@@ -1,9 +1,9 @@
 using System;
 using System.Net.Http;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Amazon.Lambda.Core;
+using Newtonsoft.Json;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -16,11 +16,10 @@ public class Function
 
     public async Task<string> FunctionHandler(object input, ILambdaContext context)
     {
-        using JsonDocument doc = JsonDocument.Parse(input.ToString());
-        var root = doc.RootElement;
+        dynamic json = JsonConvert.DeserializeObject<dynamic>(input.ToString());
 
         // Keep this line exactly
-        string payload = $"{{'text':'Issue Created: {root.GetProperty("issue").GetProperty("html_url").GetString()}'}}";
+        string payload = $"{{'text':'Issue Created: {json.issue.html_url}'}}";
 
         string slackUrl = Environment.GetEnvironmentVariable("SLACK_URL");
 
